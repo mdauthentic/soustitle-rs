@@ -16,6 +16,25 @@ pub struct Subtitle {
     pub text: String,
 }
 
+impl Subtitle {
+    fn new(id: i32, start_time: NaiveTime, end_time: NaiveTime, text: String) -> Subtitle {
+        Subtitle{
+            id: id, 
+            start_time: start_time, 
+            end_time: end_time, 
+            text: text,
+        }
+    }
+
+    fn srt_text(&self) -> String {
+        return format!("{}", self.text);
+    }
+
+    fn as_csv_str(&self) -> String {
+        return format!("{},{},{},{}", self.id, self.start_time, self.end_time, self.text);
+    }
+}
+
 impl fmt::Debug for Subtitle {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Subtitle")
@@ -42,15 +61,20 @@ pub fn read_file<P: AsRef<Path>>(file_name: P) -> Result<String, Box<dyn Error>>
     Ok(content)
 }
 
-
-pub fn write_data<P: AsRef<Path>>(srt_data: Vec<Subtitle>, file_name: P) -> std::io::Result<()> {
+pub fn write_data<P: AsRef<Path>>(srt_data: Vec<Subtitle>, file_name: P, all_fields: bool) -> std::io::Result<()> {
     let mut f = File::create(file_name).unwrap();
 
-    writeln!(&mut f, "{}", SRT_CSV_HEADER).unwrap();
-
-    for item in &srt_data {
-        writeln!(&mut f, "{},{},{},{}", item.id, item.start_time, item.end_time, item.text).unwrap();
+    if all_fields {
+        writeln!(&mut f, "{}", SRT_CSV_HEADER).unwrap();
+        for item in &srt_data {
+            writeln!(&mut f, "{}", item.as_csv_str()).unwrap();
+        }
+    } else {
+        for item in &srt_data {
+            writeln!(&mut f, "{}", item.srt_text()).unwrap();
+        }
     }
+
     Ok(())
 }
 
@@ -74,17 +98,16 @@ pub fn parse_srt_string(srt: &'static str) -> Vec<Subtitle> {
 
             let mut subtitle = String::new();
             for x in 2..srt_instance.len() {
-                // subtitle.push_str(srt_instance[x]);
                 let srt_with_space = format!("{} {}", srt_instance[x], " ");
                 subtitle.push_str(&srt_with_space);
             }
             
-            content.push(Subtitle{
-                    id: srt_instance[0].parse::<i32>().unwrap(), 
-                    start_time: str_to_time(&time_start), 
-                    end_time: str_to_time(&time_end), 
-                    text: subtitle
-                }
+            content.push(Subtitle::new(
+                    srt_instance[0].parse::<i32>().unwrap(), 
+                    str_to_time(&time_start), 
+                    str_to_time(&time_end), 
+                    subtitle
+                )
             );
         } else {
             continue;
