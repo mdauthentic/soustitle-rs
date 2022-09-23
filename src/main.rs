@@ -3,9 +3,6 @@ mod lib;
 
 fn main() {
 
-    // Usage: 
-    //      cargo run -- -i path/data/sample.srt
-
     let matches = App::new("Soustitle-rs")
         .version("0.1.0")
         .author("Muideen Lawal <muideen.lawal320@gmail.com>")
@@ -30,9 +27,6 @@ fn main() {
                 println!("Parsed SRT: {:?}", result);
             }
         }
-
-    // let result = lib::parse("/data/sample.srt");
-    // println!("Parsed SRT: {:?}", result);
 
     //lib::write_data(result, "/data/output.csv", true).unwrap();
 
