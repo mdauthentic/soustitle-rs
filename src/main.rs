@@ -21,7 +21,7 @@ fn main() {
 
         let myfile = matches.value_of("input");
         match myfile {
-            None => println!("No idea what your favorite number is."),
+            None => println!("You have to pass a valid subtitle file path."),
             Some(s) => {
                 let result = lib::parse(s);
                 println!("Parsed SRT: {:?}", result);
